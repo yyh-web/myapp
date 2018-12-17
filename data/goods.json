@@ -1,0 +1,17 @@
+{
+  "status":"0",
+  "msg":"",
+  "result":[{
+    "productId":"100001",
+    "productName":"小米手机",
+    "price" : "3899",
+    "productImg" : "1.jpg"
+  },
+    {
+      "productId":"100002",
+      "productName":"华为手机",
+      "price" : "6899",
+      "productImg" : "2.jpg"
+    }
+  ]
+}

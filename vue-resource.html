@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script src="node_modules/vue/dist/vue.js"></script>
+  <script src="node_modules/vue-resource/dist/vue-resource.js"></script>
+</head>
+<body>
+   <div id="app" class="container">
+     <h1>vue-resource插件讲解</h1>
+     <a href="javascript:;"  class="btn btn-primary" v-on:click="get">Get请求</a>
+     <a href="javascript:;" class="btn btn-primary" @click="post">Post请求</a>
+     <a href="javascript:;"  @click="jsonp" class="btn btn-primary">JSONP请求</a>
+     <a href="javascript:;"  @click="http" class="btn btn-primary">http请求</a>
+     <a href="tel:18565626192"></a>
+     {{msg}}
+   </div>
+
+    <div id="one">
+      click parent
+       <div id="two">click child</div>
+    </div>
+
+</body>
+<script>
+  document.getElementById("one").addEventListener("click",function(event){
+    event.stopPropagation();
+      alert("one");
+  });
+  document.getElementById("two").addEventListener("click",function(event){
+    event.stopPropagation();
+      alert("two");
+
+  });
+</script>
+<script>
+
+  new Vue({
+    el:"#app",
+    data:{
+      msg:""
+    },
+    mounted:function(){
+    	// 全局请求拦截器配置
+    	Vue.http.interceptors.push(function(request,next){
+    		console.log("request init.......请求前");
+    		next(function(response){
+    			console.log("response init.......请求后");
+    			return response;
+    		});
+    	});
+    },
+    http:{
+    	root:"http://127.0.0.1:8020/myapp/" // 配置全局的地址
+    },
+    methods:{
+      get:function() {
+        this.$http.get("http://192.168.1.133:9090/servlet/json",{
+          params:{
+            "client_id" : "103000001891",
+            "phone": "13006614736",
+            "type" : "0",
+            "integral" : "1",
+            "behavior" : "2",
+            "remark" : "测试绑定期货账户",
+            "funcNo":"1105320",
+            "user_id":"13006614736"
+          },
+          headers:{
+            token:"abcd"
+          }
+        }).then(res=>{
+            // es6
+            this.msg = res.data;
+        },error=>{
+            this.msg = error;
+        });
+      },
+      post:function(){
+          this.$http.post("package.json",{
+              // 参数
+               userId:"101"
+          },{
+              headers:{
+                  access_token:"abcdedf"
+              }
+          }).then(res=>{
+              this.msg = res.data;
+          });
+      },
+      jsonp:function(){
+          this.$http.jsonp("http://192.168.1.133:9090/servlet/json",{
+              params:{
+                "client_id" : "103000001891",
+                "phone": "13006614736",
+                "type" : "0",
+                "integral" : "1",
+                "behavior" : "2",
+                "remark" : "测试绑定期货账户",
+                "funcNo":"1105320"
+              }
+          }).then(res=>{
+				this.msg= res.data;
+		  },error=>{
+		  	this.msg = error;
+		  });
+      },
+      http:function(){
+      	this.$http({
+      		url:"package.json",
+      		params:{
+      			userId : "12322456"
+      		},
+      		headers:{
+      			"access_token":"sfd"
+      		},
+      		before:function(){
+      			console.log("before init..");
+      		},
+      		timeout:5
+      	}).then(function(res){
+      		this.msg = res.data;
+      	});
+      }
+    }
+  });
+
+</script>
+</html>
+
+

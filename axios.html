@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <script src="node_modules/vue/dist/vue.js"></script>
+  <script src="node_modules/axios/dist/axios.js"></script>
+</head>
+<body>
+   <div id="app" class="container">
+     <h1>axios插件讲解</h1>
+     <a href="javascript:;"  class="btn btn-primary" v-on:click="get">Get请求</a>
+     <a href="javascript:;" class="btn btn-primary" @click="post">Post请求</a>
+<a href="javascript:;" class="btn btn-primary" @click="http">http请求</a>
+     {{msg}}
+   </div>
+
+</body>
+<script>
+  new Vue({
+    el:"#app",
+    data:{
+      msg:""
+    },
+    mounted:function(){
+    	// 全局请求拦截器配置
+    	axios.interceptors.request.use(function(config){
+    		console.log("request  请求前");
+    		return config;
+    	});
+    	axios.interceptors.response.use(function(response){
+    		console.log("response 响应后");
+    		return response;
+    	});
+    },
+    http:{
+    	root:"http://127.0.0.1:8020/myapp/" // 配置全局的地址
+    },
+    methods:{
+      get:function() {
+       	  axios.get("package.json",{
+       	  	params:{
+       	  		userId : "132465"
+       	  	},
+       	  	headers:{
+       	  		token:"w23wee"
+       	  	}
+       	  }).then(res=>{
+       	  	this.msg = res.data;
+       	  }).catch(error=>{
+       	  	this.msg = error;
+       	  });
+      },
+      post:function(){
+          axios.post("package.json",{
+          	userId : "wrewer"
+          },{
+          	headers:{
+          		
+          	}
+          }).then(res=>{
+          	this.msg = res.data;
+          });
+      },
+      http:function(){
+      	 axios({
+      	 	url:"package.json",
+      	 	method:"get",
+      	 	params:{
+      	 		// get请求时  参数用params配置
+      	 		userId : "101"
+      	 	},
+      	 	data:{
+      	 		// post请求时 用data配置参数
+      	 		userId : "102"
+      	 	},
+      	 	headers:{
+      	 		token : 'http-post-get-test'
+      	 	}
+      	 }).then(res=>{
+      	 	this.msg = res.data
+      	 });
+      }
+    }
+  });
+
+</script>
+</html>
+
+
