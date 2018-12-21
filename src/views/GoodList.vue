@@ -18,8 +18,8 @@
       <div class="container">
         <div class="filter-nav">
           <span class="sortby">Sort by:</span>
-          <a href="javascript:void(0)" class="default cur">Default</a>
-          <a href="javascript:void(0)" class="price">Price
+          <a href="javascript:void(0)" @click="sortBtn(sortFlag ='default')" class="default cur">Default</a>
+          <a href="javascript:void(0)" @click="sortBtn(sortFlag ='price')" class="price">Price
             <svg class="icon icon-arrow-short">
               <use xlink:href="#icon-arrow-short"></use>
             </svg>
@@ -56,6 +56,9 @@
                   </div>
                 </li>
               </ul>
+              <div v-infinite-scroll="loadMore"  infinite-scroll-immediate-check="false" class="loadMore" infinite-scroll-disabled="busy" infinite-scroll-distance="10">
+                    {{loadTxt}}
+              </div>
             </div>
           </div>
         </div>
@@ -65,7 +68,15 @@
     <nav-footer></nav-footer>
   </div>
 </template>
+<style>
 
+  .loadMore{
+    display: block;
+    text-align: center;
+    height: 50px;
+    line-height: 50px;
+  }
+</style>
 <script>
   import NavHeader from "@/components/NavHeader";
   import NavFooter from "@/components/NavFooter";
@@ -78,6 +89,9 @@
     name: 'goodList',
     data () {
       return {
+        loadTxt:"加载中...",
+        curPage:1,
+        pageSize:8,
         msg: '这是商品列表页',
         goodsList: [],
         priceFilter: [{
@@ -92,7 +106,10 @@
         }],
         priceChecked : 'all',
         isShowPrice : false,
-        isShowOverLay : false
+        isShowOverLay : false,
+        sortFlag : 'default', // 排序方式
+        isUpPrice : false,
+        busy:false // 是否禁止滑动加载 默认不禁用
       }
     },
     components: {
@@ -103,11 +120,31 @@
       this.getGoodList();
     },
     methods: {
-      getGoodList(){
-        axios.get("/api/goods/").then((result) => {
+      getGoodList(isAppend){
+          var params = {
+            curPage : this.curPage,
+            numPerPage : this.pageSize,
+            sort : this.isUpPrice ? 1 : -1
+          };
+        axios.get("/api/goods/",{params:params}).then((result) => {
           var res = result.data;
           if(res.status == "0"){
-              this.goodsList = res.result.list;
+              if(isAppend){
+                  // 是累加
+                this.goodsList = this.goodsList.concat(res.result.list);
+              }else{
+                this.goodsList = res.result.list;
+              }
+
+              // 判断滑动是否可加载
+            if(res.result.count < this.pageSize){
+                  this.busy = true;
+                  this.loadTxt = '没有更多数据了';
+            }else{
+              this.busy = false;
+            }
+          }else{
+              alert(res.msg);
           }
 
         })
@@ -123,6 +160,26 @@
       doFilterAction(index){
         this.priceChecked = index;
         this.hideFilterPop();
+      },
+      // 排序点击
+
+      sortBtn(flag){
+          if(flag == 'default'){
+              // 默认排序
+            this.getGoodList();
+          }else{
+              this.isUpPrice = !this.isUpPrice;
+            this.getGoodList();
+            }
+      },
+      loadMore(){
+         // 加载下一页
+        this.busy = true; // 设置为滑动不加载
+        this.curPage++;
+        setTimeout(()=>{
+          this.getGoodList(true);
+        },500)
+
       }
     }
   }

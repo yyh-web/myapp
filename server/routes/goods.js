@@ -26,7 +26,37 @@ mongoose.connection.on("disconnected",()=>{
 
 // 实现路由  访问 / 时默认查询商品信息
 router.get("/",(req,res,next)=>{
-  //next  继续执行
+  // 获取参数
+  let curPage = parseInt(req.param("curPage"));
+  let numPerPage = parseInt(req.param("numPerPage")); // 需要转数字
+  let sort = parseInt(req.param("sort")); // 1 升序 -1降序
+  let skip = (curPage - 1) * numPerPage; // 需要跳过的条数
+
+  let reqParam = {};
+  let goodModel = Goods.find(reqParam).skip(skip).limit(numPerPage); // 跳过多少条 取几条
+  // 排序
+  goodModel.sort({"goodPrice":sort}); // 按goodprice排序
+  // 执行查询
+  goodModel.exec((err,doc)=>{
+    if(err){
+      res.json({
+        status : "-1",
+        msg:err.message
+      });
+    }else{
+      res.json({
+        status : "0",
+        msg:"",
+        result:{
+          count:doc.length,
+          curPage : curPage,
+          pageSize : numPerPage,
+          list:doc
+        }
+      });
+    }
+  });
+  /*//next  继续执行
   Goods.find({},(error,doc)=>{
 
     if(error){
@@ -44,7 +74,7 @@ router.get("/",(req,res,next)=>{
         }
       });
     }
-  }); //查询集合（数据）
+  }); //查询集合（数据）*/
 });
 
 module.exports = router;
